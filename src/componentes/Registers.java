@@ -20,4 +20,8 @@ public class Registers {
 		return this.registers[n];	
 	}
 	
+	public void add(int n,int cant) {
+		this.registers[n] += cant;
+	}
+	
 }

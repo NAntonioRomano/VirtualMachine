@@ -1,6 +1,6 @@
 package componentes;
 
-import java.io.IOException;
+
 
 public class VirtualMainMemory {
 	private final int MEMORY_SIZE;
@@ -20,10 +20,10 @@ public class VirtualMainMemory {
 		this.memory[fisic_address] = newdata;
 	}
 	
-	public void setMemory(byte[] memory, byte[] size) throws IOException {
+	public void setMemory(byte[] memory, byte[] size) throws Exception {
 		int s = ((int)(size[0] << 8)|(int)(size[1]) & 0xFF);
 		if(s > this.MEMORY_SIZE) {
-			throw new IOException("Exceeded virtual memory size");
+			throw new Exception("Exceeded virtual memory size");
 		}else {
 			System.arraycopy(memory, 0, this.memory, 0, memory.length);
 		}

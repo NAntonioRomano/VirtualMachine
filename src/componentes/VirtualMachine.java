@@ -1,6 +1,6 @@
 package componentes;
 
-import java.io.*;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,14 +17,12 @@ public class VirtualMachine {
 		
 	}
 	
-	public void init(String vmx_path) throws Exception{
+	public void init(byte[] allbytes) throws Exception{
 		try {
 			
-			byte[] allbytes = Files.readAllBytes(Paths.get(vmx_path));
 			byte[] header = new byte[5];
 			byte[] version = new byte[1];
-			byte[] size = new byte[2];
-			byte[] memory = new byte[allbytes.length - 8];
+
 			
 			
 			System.arraycopy(allbytes,0,header,0, 5);
@@ -35,11 +33,7 @@ public class VirtualMachine {
 			
 			validateVersion(version);
 			
-			System.arraycopy(allbytes,6,size,0,2);
-			System.arraycopy(allbytes,8,memory,0,allbytes.length - 8);
-			
-			this.virtualMemory.setMemory(memory, size);
-			this.segTable.setSegmentTable(size);
+
 			
 			
 		} catch (Exception e) {
@@ -48,7 +42,26 @@ public class VirtualMachine {
 		
 	}
 	
+	public void startMemory(byte[] allbytes) throws Exception {
+		byte[] size = new byte[2];
+		byte[] memory = new byte[allbytes.length - 8];
+		
+		System.arraycopy(allbytes,6,size,0,2);
+		System.arraycopy(allbytes,8,memory,0,allbytes.length - 8);
+		
+		try {
+		
+			this.virtualMemory.setMemory(memory, size);
+			this.segTable.setSegmentTable(size);
+			
+		}catch(Exception e) {
+			throw e;
+		}
+		
+	}
+	
 	public void execute() throws Exception {
+		int instruction;
 		int codop;
 		int opA;
 		int opB;
@@ -56,33 +69,34 @@ public class VirtualMachine {
 		this.registers.initRegisters(this.segTable);
 		
 		try {
-		
-			codop = this.getcodop(this.virtualMemory.readByte(this.registers.getRegister(5)));
+			
+			instruction = this.virtualMemory.readByte(this.registers.getRegister(5));
+			codop = this.getcodop(instruction);
 			
 			while(this.registers.getRegister(5) <= this.segTable.getSize(0) && codop != 0x0F) {
-				opA = this.getopA(this.virtualMemory.readByte(this.registers.getRegister(5)));
-				opB = this.getopB(this.virtualMemory.readByte(this.registers.getRegister(5)));
+				opA = this.getopA(instruction);
+				opB = this.getopB(instruction);
 				this.opera(codop,opA,opB);
-				this.incrementaIP(this.virtualMemory.readByte(this.registers.getRegister(5)));
-				codop = this.getcodop(this.virtualMemory.readByte(this.registers.getRegister(5)));
+				this.incrementaIP(instruction);
+				instruction = this.virtualMemory.readByte(this.registers.getRegister(5));
+				codop = this.getcodop(instruction);
 			}
 		}catch(Exception e) {
 			throw e;
 		}
 	}
 
-	private void incrementaIP(int byte1) {
-		// TODO Auto-generated method stub
+	private void opera(int codop, int opA, int opB) {
 		
 	}
 
-	private void opera(int codop, int opA, int opB) {
-		// TODO Auto-generated method stub
-		
+	private void incrementaIP(int register) {
+		int cant =((register >> 6) & 0x3 + (register >> 4) & 0x3);
+		this.registers.add(5, cant);
 	}
 
 	private int getopB(int register) {
-		int tipo = (register >> 4) & 0x3;
+		int tipo = (register >> 6) & 0x3;
 		int opB= 0;
 		
 		for(int i = 1; i <= tipo; i++) {
@@ -97,7 +111,7 @@ public class VirtualMachine {
 		int opA = 0;
 		
 		for(int i = 1; i <= tipo; i++) {
-			opA = (opA << 8) & this.virtualMemory.readByte(this.registers.getRegister(5) + i + ((register >> 6) & 0x3));
+			opA = (opA << 8) | this.virtualMemory.readByte(this.registers.getRegister(5) + i + ((register >> 6) & 0x3));
 		}
 		
 		return opA;
