@@ -14,7 +14,7 @@ public class mainVM {
 			byte[] allbytes = Files.readAllBytes(Paths.get(args[0]));
 			
 			vm.validateExtension(args[0]);
-			vm.init(allbytes);
+			vm.verify(allbytes);
 			vm.startMemory(allbytes);
 			vm.execute();
 			
