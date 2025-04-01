@@ -25,7 +25,7 @@ public class SegmentTable {
 		
 	}
 	
-	public int LogicToFisic(int logic_address) {
+	public int LogicToFisic(int logic_address) throws Exception {
 		int Mask = 0x0000FFFF;
 		int segment = (logic_address >> 16) & Mask;
 		int offset = logic_address & Mask;
@@ -37,6 +37,7 @@ public class SegmentTable {
 		
 		if(fisic_address <= limit_segment) 
 			return fisic_address;
-		return 0;//POR AHORA!!!
+		else
+			throw new Exception("Excedeed limit segment");
 	}
 }

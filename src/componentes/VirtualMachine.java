@@ -1,23 +1,35 @@
 package componentes;
 
+import mnemonic.*;
+
+import java.util.HashMap;
+
+import mnemonic.Mnemonic;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
+
 public class VirtualMachine {
 	private VirtualMainMemory virtualMemory;
 	private SegmentTable segTable;
 	private Registers registers;
+	private HashMap<Integer,Mnemonic> mnemonics;
 	
 	public VirtualMachine() {
 		this.virtualMemory = new VirtualMainMemory();
 		this.segTable = new SegmentTable();
 		this.registers = new Registers();
-		
+		this.mnemonics = new HashMap<>();
 	}
 	
-	public void init(byte[] allbytes) throws Exception{
+	private void setMnemonics() {
+		mnemonics.put(0x01, new MOV());
+	}
+	
+	public void verify(byte[] allbytes) throws Exception{
 		try {
 			
 			byte[] header = new byte[5];
@@ -73,12 +85,12 @@ public class VirtualMachine {
 			instruction = this.virtualMemory.readByte(this.registers.getRegister(5));
 			codop = this.getcodop(instruction);
 			
-			while(this.registers.getRegister(5) <= this.segTable.getSize(0) && codop != 0x0F) {
+			while(this.segTable.LogicToFisic(this.registers.getRegister(5)) <= this.segTable.getSize(0) && codop != 0x0F) {
 				opA = this.getopA(instruction);
 				opB = this.getopB(instruction);
 				this.opera(codop,opA,opB);
 				this.incrementaIP(instruction);
-				instruction = this.virtualMemory.readByte(this.registers.getRegister(5));
+				instruction = this.virtualMemory.readByte(this.segTable.LogicToFisic(this.registers.getRegister(5)));
 				codop = this.getcodop(instruction);
 			}
 		}catch(Exception e) {

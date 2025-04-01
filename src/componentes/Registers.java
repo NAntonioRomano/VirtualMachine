@@ -11,8 +11,8 @@ public class Registers {
 	}
 	
 	public void initRegisters(SegmentTable ST) {
-		this.registers[0] = (ST.getSegmentTable()[0] >> 16) & 0xFFFF;
-		this.registers[1] = (ST.getSegmentTable()[1] >> 16) & 0xFFFF;
+		this.registers[0] = 0x00000000;
+		this.registers[1] = 0x00010000;
 		this.registers[5] = this.registers[0];
 	}
 	
