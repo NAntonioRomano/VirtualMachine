@@ -64,7 +64,7 @@ public class VirtualMachine {
 		try {
 		
 			this.virtualMemory.setMemory(memory, size);
-			this.segTable.setSegmentTable(size);
+			this.segTable.setSegmentTable(size,this.virtualMemory.getMemory());
 			
 		}catch(Exception e) {
 			throw e;
